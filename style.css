@@ -1,4 +1,3 @@
-
 /*
  * CSCE 679 - Data Visualization Assignment 1
  * Styling for the temperature heatmaps and legends.
@@ -18,7 +17,6 @@ body {
   line-height: 1.5;
 }
 
-/* Main heading */
 h1 {
   text-align: center;
   margin-bottom: 8px;
@@ -74,37 +72,65 @@ section > p {
   border-color: #24476b;
 }
 
+/* Chart on the left, color legend on the right (Level 2) */
+.chart-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
 /* Allow wide charts to scroll horizontally */
 .chart-container {
-  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   margin-bottom: 15px;
 }
 
-/* SVG visualization elements */
 .chart-container svg {
   display: block;
   max-width: none;
   height: auto;
 }
 
-/* Heatmap cells */
+/* Level 1 heatmap cells */
 .heatmap-cell {
   stroke: #ffffff;
   stroke-width: 1px;
   cursor: pointer;
-  transition: opacity 0.15s ease;
 }
 
 .heatmap-cell:hover {
   stroke: #222222;
   stroke-width: 2px;
-  opacity: 0.8;
+}
+
+/* Level 2 mini chart cells */
+.cell-background {
+  stroke: #ffffff;
+  stroke-width: 1px;
+}
+
+.daily-line {
+  fill: none;
+  stroke-width: 1.8px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.cell-overlay {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.cell-overlay:hover {
+  stroke: #222222;
+  stroke-width: 1.5px;
 }
 
 /* Axis labels and lines */
 .axis text {
-  font-size: 11px;
+  font-size: 12px;
   fill: #333333;
 }
 
@@ -113,18 +139,19 @@ section > p {
   stroke: #999999;
 }
 
-/* Hover tooltip */
+/* Hover tooltip: white box with dark text */
 .tooltip {
   position: absolute;
   z-index: 100;
   pointer-events: none;
-  padding: 9px 12px;
-  background-color: #222222;
-  color: #ffffff;
-  border-radius: 5px;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  color: #111111;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
   font-size: 12px;
-  line-height: 1.6;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 /* Temperature color legend */
@@ -132,16 +159,44 @@ section > p {
   display: block;
   max-width: 100%;
   margin-top: 12px;
-  font-size: 12px;
 }
 
-/* Legend for daily maximum and minimum lines */
+.legend text {
+  font-size: 12px;
+  fill: #333333;
+}
+
+/* Legend for the daily maximum and minimum lines */
 .line-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
   margin: 10px 0;
   font-size: 13px;
+}
+
+.line-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.line-swatch {
+  display: inline-block;
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.chart-note {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.error-message {
+  color: #b00020;
+  font-weight: bold;
 }
 
 /* Footer */
@@ -163,5 +218,9 @@ footer {
 
   h1 {
     font-size: 24px;
+  }
+
+  .chart-row {
+    flex-direction: column;
   }
 }
