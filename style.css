@@ -92,6 +92,14 @@ section > p {
 .heatmap-cell {
   stroke: #ffffff;
   stroke-width: 1px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.heatmap-cell:hover {
+  stroke: #222222;
+  stroke-width: 2px;
+  opacity: 0.8;
 }
 
 /* Axis labels and lines */
