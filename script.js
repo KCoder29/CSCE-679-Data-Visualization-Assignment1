@@ -262,3 +262,211 @@ function drawLineLegend(container) {
     item.append("span").text(label);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Level 1: monthly heatmap with a Max / Min switch
+// ---------------------------------------------------------------------------
+
+function level1Tooltip(d) {
+  return `Date: ${formatMonth(monthStart(d))}; max: ${d.monthlyMax} min: ${d.monthlyMin}`;
+}
+
+function drawLevel1(monthlyData) {
+  const { margin, cellWidth, cellHeight } = LEVEL1_LAYOUT;
+  const container = d3.select("#level1-visualization");
+  container.selectAll("*").remove();
+
+  const years = uniqueYears(monthlyData);
+  const months = d3.range(1, 13);
+
+  // Max / Min buttons
+  const buttons = container.append("div")
+    .attr("class", "chart-controls")
+    .selectAll("button")
+    .data(Object.entries(MODES))
+    .join("button")
+    .text(([, mode]) => mode.label)
+    .on("click", (event, [key]) => update(key));
+
+  // Heatmap: one cell for every month-year combination
+  const width = margin.left + margin.right + years.length * cellWidth;
+  const height = margin.top + margin.bottom + months.length * cellHeight;
+  const svg = createSvg(container, width, height);
+
+  const x = d3.scaleBand()
+    .domain(years)
+    .range([margin.left, margin.left + years.length * cellWidth])
+    .padding(0.08);
+
+  const y = d3.scaleBand()
+    .domain(months)
+    .range([margin.top, margin.top + months.length * cellHeight])
+    .padding(0.08);
+
+  drawAxes(svg, x, y, margin);
+
+  const cells = svg.selectAll(".heatmap-cell")
+    .data(monthlyData)
+    .join("rect")
+    .attr("class", "heatmap-cell")
+    .attr("x", d => x(d.year))
+    .attr("y", d => y(d.month))
+    .attr("width", x.bandwidth())
+    .attr("height", y.bandwidth())
+    .on("mouseover", (event, d) => showTooltip(event, level1Tooltip(d)))
+    .on("mousemove", moveTooltip)
+    .on("mouseout", hideTooltip);
+
+  const legendBox = container.append("div");
+
+  // Recolor the cells and rebuild the legend for the chosen mode.
+  function update(modeKey) {
+    const { label, field } = MODES[modeKey];
+
+    buttons
+      .classed("active", ([key]) => key === modeKey)
+      .attr("aria-pressed", ([key]) => key === modeKey);
+
+    cells.attr("fill", d => colorScale(d[field]));
+
+    legendBox.selectAll("*").remove();
+    drawColorLegend(legendBox, `${label} temperature (°C)`);
+  }
+
+  update("max");
+}
+
+// ---------------------------------------------------------------------------
+// Level 2: mini line charts of the daily temperatures
+// ---------------------------------------------------------------------------
+
+function level2Tooltip(record) {
+  return `Date: ${formatDay(record.date)}, max: ${record.maxTemperature} min: ${record.minTemperature}`;
+}
+
+function drawLevel2(monthlyData) {
+  const { margin, cellWidth, cellHeight, innerPadding } = LEVEL2_LAYOUT;
+  const container = d3.select("#level2-visualization");
+  container.selectAll("*").remove();
+
+  const years = uniqueYears(monthlyData).slice(-RECENT_YEARS);
+  const data = monthlyData.filter(d => years.includes(d.year));
+  const months = d3.range(1, 13);
+
+  // Chart on the left, color legend on the right.
+  const row = container.append("div").attr("class", "chart-row");
+
+  const width = margin.left + margin.right + years.length * cellWidth;
+  const height = margin.top + margin.bottom + months.length * cellHeight;
+  const svg = createSvg(row, width, height);
+
+  const xYear = d3.scaleBand()
+    .domain(years)
+    .range([margin.left, margin.left + years.length * cellWidth])
+    .padding(0.08);
+
+  const yMonth = d3.scaleBand()
+    .domain(months)
+    .range([margin.top, margin.top + months.length * cellHeight])
+    .padding(0.08);
+
+  drawAxes(svg, xYear, yMonth, margin);
+
+  // Every cell has the same size and uses the same two scales, so the
+  // mini charts can be compared with each other.
+  const innerWidth = xYear.bandwidth();
+  const innerHeight = yMonth.bandwidth();
+
+  const dayScale = d3.scaleLinear()
+    .domain([1, 31])
+    .range([innerPadding, innerWidth - innerPadding]);
+
+  const temperatureScale = d3.scaleLinear()
+    .domain([d3.min(data, d => d.monthlyMin), d3.max(data, d => d.monthlyMax)])
+    .nice()
+    .range([innerHeight - innerPadding, innerPadding]);
+
+  const maxLine = d3.line()
+    .x(d => dayScale(d.date.getDate()))
+    .y(d => temperatureScale(d.maxTemperature));
+
+  const minLine = d3.line()
+    .x(d => dayScale(d.date.getDate()))
+    .y(d => temperatureScale(d.minTemperature));
+
+  const cells = svg.selectAll(".daily-cell")
+    .data(data)
+    .join("g")
+    .attr("class", "daily-cell")
+    .attr("transform", d => `translate(${xYear(d.year)},${yMonth(d.month)})`);
+
+  // Background color = the month's maximum temperature (same as Level 1 "max").
+  cells.append("rect")
+    .attr("class", "cell-background")
+    .attr("width", innerWidth)
+    .attr("height", innerHeight)
+    .attr("fill", d => colorScale(d.monthlyMax));
+
+  cells.append("path")
+    .attr("class", "daily-line")
+    .attr("stroke", LINE_COLORS.max)
+    .attr("d", d => maxLine(d.records));
+
+  cells.append("path")
+    .attr("class", "daily-line")
+    .attr("stroke", LINE_COLORS.min)
+    .attr("d", d => minLine(d.records));
+
+  // Transparent layer on top that reports the day under the mouse.
+  cells.append("rect")
+    .attr("class", "cell-overlay")
+    .attr("width", innerWidth)
+    .attr("height", innerHeight)
+    .on("mouseover mousemove", function (event, d) {
+      const [mouseX] = d3.pointer(event, this);
+      const day = dayScale.invert(mouseX);
+      const record = d3.least(d.records, r => Math.abs(r.date.getDate() - day));
+      showTooltip(event, level2Tooltip(record));
+    })
+    .on("mouseout", hideTooltip);
+
+  // Color legend to the right of the chart.
+  drawVerticalLegend(row.append("div"), "Monthly maximum");
+
+  // Line legend and a short explanation of the axes inside each cell.
+  drawLineLegend(container);
+
+  const [tempLow, tempHigh] = temperatureScale.domain();
+  container.append("p")
+    .attr("class", "chart-note")
+    .text(
+      `Inside each cell: x = day of the month (1 to 31), y = temperature ` +
+      `(${tempLow}°C to ${tempHigh}°C, the same scale in every cell). ` +
+      `Cell background = that month's maximum temperature (see the color legend).`
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Start
+// ---------------------------------------------------------------------------
+
+function showError(error) {
+  console.error("Error loading temperature data:", error);
+  d3.select("body")
+    .append("p")
+    .attr("class", "error-message")
+    .text("Could not load the temperature data. Check the CSV filename and date format.");
+}
+
+d3.csv(DATA_FILE, parseRow)
+  .then(rows => {
+    const data = rows.filter(isValidRecord);
+    if (data.length === 0) {
+      throw new Error("No valid temperature records were found.");
+    }
+
+    const monthlyData = groupByMonth(data);
+    drawLevel1(monthlyData);
+    drawLevel2(monthlyData);
+  })
+  .catch(showError);
