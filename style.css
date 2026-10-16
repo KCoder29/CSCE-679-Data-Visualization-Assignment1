@@ -1,0 +1,63 @@
+
+/* General page appearance */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+  background-color: #ffffff;
+}
+
+/* Main page heading */
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Section headings */
+h2 {
+  margin-bottom: 15px;
+}
+
+/* Keep each visualization section organized */
+section {
+  margin: 0 auto 40px auto;
+  max-width: 1200px;
+}
+
+/* Allow wide visualizations to scroll on small screens */
+#level1-visualization,
+#level2-visualization {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Make SVG visualizations display as block elements */
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Styling for temperature heatmap cells */
+.heatmap-cell {
+  stroke: #ffffff;
+  stroke-width: 1px;
+}
+
+/* Styling for hover tooltips */
+.tooltip {
+  position: absolute;
+  padding: 8px 10px;
+  background-color: #222222;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Styling for legends */
+.legend {
+  font-size: 12px;
+}
