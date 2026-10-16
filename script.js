@@ -160,7 +160,7 @@ function drawLevel1() {
     .attr("class", "chart-controls");
 
   controls.append("button")
-    .attr("class", "active")
+    .attr("class", currentTemperature === "max" ? "active" : "")
     .text("Monthly maximum")
     .on("click", () => {
       currentTemperature = "max";
