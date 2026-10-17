@@ -21,7 +21,10 @@ const DATE_FORMAT = "%Y-%m-%d";
 const RECENT_YEARS = 10;
 
 // Temperature range (degrees Celsius) covered by the color scale.
-const TEMPERATURE_DOMAIN = [0, 40];
+const TEMPERATURE_DOMAIN = [0, 39];
+
+// Tick positions on both color legends: every 10°C, plus the top of the range.
+const LEGEND_TICKS = [...d3.range(TEMPERATURE_DOMAIN[0], TEMPERATURE_DOMAIN[1], 10), TEMPERATURE_DOMAIN[1]];
 
 // Colors of the two daily lines in Level 2 (also used by the line legend).
 const LINE_COLORS = { max: "#2e8b57", min: "#9db4cc" };
@@ -59,7 +62,7 @@ const monthName = month => d3.timeFormat("%B")(new Date(2000, month - 1, 1));
 // First day of the month described by a monthly summary record.
 const monthStart = d => new Date(d.year, d.month - 1, 1);
 
-// Stepped color scale: 11 bins from purple (cold) to dark red (hot).
+// Stepped color scale: 11 equal bins (about 3.5°C each) from purple (cold) to dark red (hot).
 const colorScale = d3.scaleQuantize()
   .domain(TEMPERATURE_DOMAIN)
   .range(d3.schemeSpectral[11].slice().reverse());
@@ -200,12 +203,12 @@ function drawColorLegend(container, title) {
     .attr("transform", `translate(0,${22 + barHeight})`)
     .call(
       d3.axisBottom(scale)
-        .tickValues(d3.range(low, high + 1, 10))
+        .tickValues(LEGEND_TICKS)
         .tickFormat(d => `${d}°C`)
     );
 }
 
-// Vertical stepped legend (Level 2): 0 Celsius at the top, 40 Celsius at the bottom.
+// Vertical stepped legend (Level 2): 0 Celsius at the top, 39 Celsius at the bottom.
 function drawVerticalLegend(container, title) {
   const barWidth = 24;
   const binHeight = 22;
@@ -241,7 +244,7 @@ function drawVerticalLegend(container, title) {
     .attr("transform", `translate(${barWidth},0)`)
     .call(
       d3.axisRight(scale)
-        .tickValues(d3.range(low, high + 1, 10))
+        .tickValues(LEGEND_TICKS)
         .tickFormat(d => (d === low || d === high ? `${d} Celsius` : d))
     );
 }
@@ -431,8 +434,8 @@ function drawLevel2(monthlyData) {
     .on("mouseout", hideTooltip);
 
   // Color legend to the right of the chart.
-  drawVerticalLegend(row.append("div"), "Monthly maximum");
-
+  drawVerticalLegend(row.append("div"), "Monthly maximum (°C)");
+  
   // Line legend and a short explanation of the axes inside each cell.
   drawLineLegend(container);
 
