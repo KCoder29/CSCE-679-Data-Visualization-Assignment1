@@ -208,7 +208,8 @@ function drawColorLegend(container, title) {
     );
 }
 
-// Vertical stepped legend (Level 2): 0 Celsius at the top, 39 Celsius at the bottom.
+// Vertical stepped legend (Level 2): 0 Celsius at the top, labeled 40 Celsius at the bottom
+// to match the instructor's example (the color bins actually span TEMPERATURE_DOMAIN, 0 to 39).
 function drawVerticalLegend(container, title) {
   const barWidth = 24;
   const binHeight = 22;
@@ -245,7 +246,8 @@ function drawVerticalLegend(container, title) {
     .call(
       d3.axisRight(scale)
         .tickValues(LEGEND_TICKS)
-        .tickFormat(d => (d === low || d === high ? `${d} Celsius` : d))
+        // The bottom label is deliberately "40 Celsius" to match the instructor's example legend.
+        .tickFormat(d => (d === low ? `${d} Celsius` : d === high ? "40 Celsius" : d))
     );
 }
 
@@ -435,7 +437,7 @@ function drawLevel2(monthlyData) {
 
   // Color legend to the right of the chart.
   drawVerticalLegend(row.append("div"), "Monthly maximum (°C)");
-  
+
   // Line legend and a short explanation of the axes inside each cell.
   drawLineLegend(container);
 
