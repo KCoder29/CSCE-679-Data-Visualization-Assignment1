@@ -29,8 +29,10 @@ Assignment 1 using the instructor-provided daily temperature dataset
 
 - "Monthly maximum" is the highest daily maximum in that month, and "monthly
   minimum" is the lowest daily minimum in that month.
-- Both levels use one stepped color scale (0 to 40 degrees Celsius, 11 bins from
-  purple to dark red), so a color means the same temperature everywhere.
+- Both levels use one stepped color scale (0 to 39 degrees Celsius, 11 equal bins
+  of about 3.5 degrees each, from purple to dark red), so a color means the same
+  temperature everywhere. The domain was chosen so the bins match the color bins
+  in the instructor's reference images.
 - All Level 2 mini charts share the same y-scale and the same 1-31 day axis, so
   they can be compared with each other.
 - Empty values in the CSV are skipped rather than treated as 0.
