@@ -26,6 +26,10 @@ const TEMPERATURE_DOMAIN = [0, 39];
 // Tick positions on both color legends: every 10°C, plus the top of the range.
 const LEGEND_TICKS = [...d3.range(TEMPERATURE_DOMAIN[0], TEMPERATURE_DOMAIN[1], 10), TEMPERATURE_DOMAIN[1]];
 
+// Bottom label shown on both color legends. It reads 40 to match the instructor's example;
+// the color bins themselves span TEMPERATURE_DOMAIN (0 to 39).
+const LEGEND_END_LABEL = 40;
+
 // Colors of the two daily lines in Level 2 (also used by the line legend).
 const LINE_COLORS = { max: "#2e8b57", min: "#9db4cc" };
 
@@ -204,12 +208,11 @@ function drawColorLegend(container, title) {
     .call(
       d3.axisBottom(scale)
         .tickValues(LEGEND_TICKS)
-        .tickFormat(d => `${d}°C`)
+        .tickFormat(d => (d === high ? `${LEGEND_END_LABEL}°C` : `${d}°C`))
     );
 }
 
-// Vertical stepped legend (Level 2): 0 Celsius at the top, labeled 40 Celsius at the bottom
-// to match the instructor's example (the color bins actually span TEMPERATURE_DOMAIN, 0 to 39).
+// Vertical stepped legend (Level 2): 0 Celsius at the top, LEGEND_END_LABEL at the bottom.
 function drawVerticalLegend(container, title) {
   const barWidth = 24;
   const binHeight = 22;
@@ -246,8 +249,7 @@ function drawVerticalLegend(container, title) {
     .call(
       d3.axisRight(scale)
         .tickValues(LEGEND_TICKS)
-        // The bottom label is deliberately "40 Celsius" to match the instructor's example legend.
-        .tickFormat(d => (d === low ? `${d} Celsius` : d === high ? "40 Celsius" : d))
+        .tickFormat(d => (d === low ? `${d} Celsius` : d === high ? `${LEGEND_END_LABEL} Celsius` : d))
     );
 }
 
