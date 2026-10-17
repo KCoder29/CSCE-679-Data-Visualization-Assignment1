@@ -33,6 +33,10 @@ Assignment 1 using the instructor-provided daily temperature dataset
   of about 3.5 degrees each, from purple to dark red), so a color means the same
   temperature everywhere. The domain was chosen so the bins match the color bins
   in the instructor's reference images.
+- Both color legends are labeled to end at 40 to match the instructor's example,
+  while the color bins themselves span 0 to 39.
+- Level 1 tooltips show the month's highest daily maximum and lowest daily minimum.
+  Level 2 tooltips show the values for the single day under the mouse.
 - All Level 2 mini charts share the same y-scale and the same 1-31 day axis, so
   they can be compared with each other.
 - Empty values in the CSV are skipped rather than treated as 0.
